@@ -1,0 +1,55 @@
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+import networkx as nx
+import matplotlib.pyplot as plt
+
+# Set up Spotify API credentials
+client_id = '54d6fc7a76b2460886213e1449292c79'
+client_secret = '8e311d8458a44d6ab7cf9097d1c6d978'
+
+# Initialize Spotipy client
+client_credentials_manager = SpotifyClientCredentials(client_id=client_id, 
+                                                      client_secret=client_secret)
+sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+def get_related_artists(artist_name):
+    results = sp.search(q='artist:' + artist_name, type='artist', limit=1)
+    if results['artists']['items']:
+        artist = results['artists']['items'][0]
+        artist_id = artist['id']
+        related_artists = sp.artist_related_artists(artist_id)['artists']
+        return [ra['name'] for ra in related_artists]
+    else:
+        return None
+
+def buildGraph(initial_artist, max_depth=2):
+    G = nx.Graph()
+    G.add_node(initial_artist)
+    artists_to_process = [(initial_artist, 0)]
+    
+    while artists_to_process:
+        current_artist, current_depth = artists_to_process.pop(0)
+        if current_depth < max_depth:
+            related_artists = get_related_artists(current_artist)
+            if related_artists:
+                for related_artist in related_artists:
+                    if not G.has_node(related_artist):
+                        G.add_node(related_artist)
+                    if not G.has_edge(current_artist, related_artist):
+                        G.add_edge(current_artist, related_artist)
+                        artists_to_process.append((related_artist, current_depth + 1))
+
+    pos = nx.spring_layout(G, scale=2)
+    nx.draw(G, pos=pos, with_labels=True, node_color="lightblue", 
+            node_size=200, font_color="black", font_size=10,
+            font_family="Times New Roman", font_weight="bold",
+            width=1)
+    plt.margins(0.2)
+    plt.show()
+
+def main():
+    initial_artist = 'The Strokes'
+    buildGraph(initial_artist)
+
+if __name__ == "__main__":
+    main()
