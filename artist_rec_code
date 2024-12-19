@@ -4,8 +4,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 # Set up Spotify API credentials
-client_id = '54d6fc7a76b2460886213e1449292c79'
-client_secret = '8e311d8458a44d6ab7cf9097d1c6d978'
+client_id = 'SPOTIFY ID'
+client_secret = 'SPOTIFY SECRET'
 
 # Initialize Spotipy client
 client_credentials_manager = SpotifyClientCredentials(client_id=client_id, 
